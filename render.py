@@ -1,38 +1,36 @@
-"""Entrypoint of baseline experiments on gym-gridverse
+"""Entrypoint of baseline experiments visualizations on gym-gridverse
 
-Functions as a gateway to the different baseline experiments. Accepts a domain
+Functions as a gateway to visualizing (rendering) solutions. Accepts a domain
 yaml file, then specifies the type of solution method, followed by solution
 method specific cofigurations. For example, to run the random policy::
 
-    python main.py path/to/env/yaml random
+    python visualize.py path/to/env/yaml random
 
-For state-based (MDP) online planning, run for example::
+For state-based (mcts) online planning, run for example::
 
-    python main.py path/to/env/yaml planning mdp yaml/online_mcts.yaml
+    python visualize.py path/to/env/yaml planning mcts yaml/online_mcts.yaml
 
 Note that most solution methods assume configurations are at some point passed
 through a yaml file. For convenience we allow *overwriting* values in these
 config files by appending any call with overwriting values, for example::
 
-    python main.py path/to/env/yaml planning pomdp yaml/online_pouct.yaml num_sims=128
-
+    python visualize.py path/to/env/yaml planning po-uct yaml/online_pouct.yaml num_sims=128
 """
 
 import argparse
+import random
 
 from gym_gridverse.envs.yaml.factory import factory_env_from_yaml
 from yaml.loader import SafeLoader
 
 import yaml
 from gym_gridverse_baselines.planning.belief import create_rejection_sampling
-from gym_gridverse_baselines.planning.experiment import (mdp_planning,
-                                                         pomdp_planning)
 from gym_gridverse_baselines.planning.planners import create_mcts, create_pouct
-from gym_gridverse_baselines.random import random_episode
+from gym_gridverse_baselines.visualize import belief_planner_policy, render_policy
 
 
 def main():
-    """Main entry point of gym-gridverse-baselines package"""
+    """Main entry point of gym-gridverse-baselines planning"""
 
     global_parser = argparse.ArgumentParser()
     global_parser.add_argument("domain_yaml")
@@ -42,7 +40,7 @@ def main():
     cmd_parser.add_parser("random")
 
     planning_parser = cmd_parser.add_parser("planning")
-    planning_parser.add_argument("observability", choices=["mdp", "pomdp"])
+    planning_parser.add_argument("planner", choices=["mcts", "po-uct"])
     planning_parser.add_argument("conf")
 
     args, overwrites = global_parser.parse_known_args()
@@ -51,9 +49,8 @@ def main():
     env = factory_env_from_yaml(args.domain_yaml)
 
     if args.cmd == "random":
-        random_episode(env)
-
-    if args.cmd == "planning":
+        policy = lambda _, __: random.choice(env.action_space.actions)
+    elif args.cmd == "planning":
 
         with open(args.conf) as conf_file:
             conf = yaml.load(conf_file, Loader=SafeLoader)
@@ -63,14 +60,22 @@ def main():
             overwritten_key, overwritten_value = overwrite.split("=")
             conf[overwritten_key] = type(conf[overwritten_key])(overwritten_value)
 
-        if args.observability == "mdp":
-            mdp_planning(env, create_mcts(env, **conf))
-        if args.observability == "pomdp":
-            pomdp_planning(
-                env,
+        if args.planner == "mcts":
+            planner = create_mcts(env, **conf)
+            # policy just always samples true state as belief
+            policy = lambda s, o: planner(lambda: s)[0]
+        elif args.planner == "po-uct":
+            policy = belief_planner_policy(
                 create_pouct(env, **conf),
                 create_rejection_sampling(env, conf["num_particles"]),
             )
+        else:
+            raise ValueError(f"Unexpected planner {args.planner}")
+
+    else:
+        raise ValueError(f"Unexpected command {args.cmd}")
+
+    render_policy(policy, env)
 
 
 if __name__ == "__main__":

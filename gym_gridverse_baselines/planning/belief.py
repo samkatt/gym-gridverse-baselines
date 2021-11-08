@@ -27,5 +27,7 @@ def create_rejection_sampling(env: InnerEnv, n: int) -> belief_types.Belief:
 
     return belief_types.Belief(
         env.functional_reset,
-        RS.create_rejection_sampling(sim, n, eq),
+        RS.create_rejection_sampling(
+            sim, n, eq, process_acpt=RS.AcceptionProgressBar(n)
+        ),
     )

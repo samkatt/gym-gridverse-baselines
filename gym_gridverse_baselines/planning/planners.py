@@ -40,6 +40,7 @@ def create_mcts(
         rollout_depth=rollout_depth,
         max_tree_depth=max_tree_depth,
         discount_factor=discount_factor,
+        progress_bar=True,
     )
 
 
@@ -72,6 +73,7 @@ def create_pouct(
         rollout_depth=rollout_depth,
         max_tree_depth=max_tree_depth,
         discount_factor=discount_factor,
+        progress_bar=True,
     )
 
 
