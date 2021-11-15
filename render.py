@@ -68,7 +68,9 @@ def main():
         elif args.planner == "po-uct":
             policy = belief_planner_policy(
                 create_pouct(env, **conf),
-                create_rejection_sampling(env, conf["num_particles"]),
+                create_rejection_sampling(
+                    env, conf["num_particles"], conf["show_progress_bar"]
+                ),
             )
         else:
             raise ValueError(f"Unexpected planner {args.planner}")
