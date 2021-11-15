@@ -24,6 +24,8 @@ def render_policy(policy: Policy, env: InnerEnv):
     """Renders (visualizes) a trajectory in ``env`` picking actions with ``pol``
 
 
+    Will wait (sleep) until a sig kill command is given once the goal is found
+
     :param policy: Anything that returns an action given an observation
     :param env: The environment to interact with
     """
@@ -71,6 +73,10 @@ def render_policy(policy: Policy, env: InnerEnv):
         state_viewer.render(env.state, return_rgb_array=True, **hud_info)
         observation_viewer.render(env.observation, return_rgb_array=True, **hud_info)
 
+    # wait forever until someone mercifully kills us
+    while True:
+        time.sleep(10)
+
 
 def belief_planner_policy(
     planner: planning_types.Planner, belief: belief_types.Belief
@@ -91,6 +97,8 @@ def belief_planner_policy(
             belief.update(action, observation)
 
         action, _ = planner(belief.sample)
+
+        assert isinstance(action, Action)
         return action
 
     return policy

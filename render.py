@@ -4,17 +4,17 @@ Functions as a gateway to visualizing (rendering) solutions. Accepts a domain
 yaml file, then specifies the type of solution method, followed by solution
 method specific cofigurations. For example, to run the random policy::
 
-    python visualize.py path/to/env/yaml random
+    python render.py yaml/gv_crossing.5x5.yaml random
 
 For state-based (mcts) online planning, run for example::
 
-    python visualize.py path/to/env/yaml planning mcts yaml/online_mcts.yaml
+    python render.py yaml/gv_empty.8x8.yaml planning mcts yaml/online_mcts.yaml
 
 Note that most solution methods assume configurations are at some point passed
 through a yaml file. For convenience we allow *overwriting* values in these
 config files by appending any call with overwriting values, for example::
 
-    python visualize.py path/to/env/yaml planning po-uct yaml/online_pouct.yaml num_sims=128
+    python render.py path/to/env/yaml planning po-uct yaml/online_pouct.yaml num_sims=128
 """
 
 import argparse
@@ -52,7 +52,7 @@ def main():
         policy = lambda _, __: random.choice(env.action_space.actions)
     elif args.cmd == "planning":
 
-        with open(args.conf) as conf_file:
+        with open(args.conf, 'rb') as conf_file:
             conf = yaml.load(conf_file, Loader=SafeLoader)
 
         # overwrite `conf` with additional key=value parameters in `overwrites`
@@ -62,7 +62,7 @@ def main():
 
         if args.planner == "mcts":
             planner = create_mcts(env, **conf)
-            # policy just always samples true state as belief
+            # state-based policy ==> bleief == true state
             policy = lambda s, o: planner(lambda: s)[0]
         elif args.planner == "po-uct":
             policy = belief_planner_policy(
