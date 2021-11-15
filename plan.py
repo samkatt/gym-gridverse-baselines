@@ -19,8 +19,9 @@ Additionally (key-word) arguments are `-o/--out_file` and `-v/--verbose`.
 import argparse
 import itertools
 import logging
-
+import pickle
 import pandas as pd
+
 from gym_gridverse.envs.yaml.factory import factory_env_from_yaml
 from yaml.loader import SafeLoader
 
@@ -94,7 +95,10 @@ def main():
             info["episode"] = episode
 
     if args.out_file:
-        pd.DataFrame(itertools.chain(*runtime_info)).to_pickle(args.out_file)
+        with open(args.out_file, "wb") as save_file:
+            pickle.dump(
+                {"meta": conf, "data": pd.DataFrame(itertools.chain(*runtime_info))}, save_file
+            )
 
 
 if __name__ == "__main__":

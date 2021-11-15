@@ -3,3 +3,4 @@ pomdp_belief_tracking @ git+ssh://git@github.com/samkatt/pomdp-belief-tracking.g
 pyyaml
 gym_gridverse @ git+ssh://git@github.com/abaisero/gym-gridverse.git@master
 pandas
+matplotlib
