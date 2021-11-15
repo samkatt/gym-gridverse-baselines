@@ -52,13 +52,14 @@ def main():
         policy = lambda _, __: random.choice(env.action_space.actions)
     elif args.cmd == "planning":
 
-        with open(args.conf, 'rb') as conf_file:
+        with open(args.conf, "rb") as conf_file:
             conf = yaml.load(conf_file, Loader=SafeLoader)
 
         # overwrite `conf` with additional key=value parameters in `overwrites`
         for overwrite in overwrites:
             overwritten_key, overwritten_value = overwrite.split("=")
             conf[overwritten_key] = type(conf[overwritten_key])(overwritten_value)
+        conf["show_progress_bar"] = True
 
         if args.planner == "mcts":
             planner = create_mcts(env, **conf)

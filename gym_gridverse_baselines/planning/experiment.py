@@ -4,6 +4,8 @@ Currently provided:
     - ``mdp_planning``: runs a state-based (MDP) planner
     - ``pomdp_planning``: runs a belief/observation-based (POMDP) planner
 """
+import itertools
+import logging
 
 from gym_gridverse.action import Action as GridverseAction
 from gym_gridverse.envs.inner_env import InnerEnv
@@ -11,48 +13,53 @@ from online_pomdp_planning.types import Planner
 from pomdp_belief_tracking.types import Belief
 
 
-def mdp_planning(env: InnerEnv, planner: Planner):
+def run_mdp_episode(env: InnerEnv, planner: Planner):
     """Runs an episode in ``env`` using ``planner`` to pick actions
 
     NOTE: provides ``planner`` with the (true) state
     """
 
-    # to be generated and returned
-    rewards = []
+    # `runtime_info[t]` gives a dictionary of runtime info at timestep `t`
     runtime_info = []
-
-    terminal = False
-
     env.reset()
 
-    while not terminal:
+    logging.info("Starting episode in %s", env.state)
+
+    for timestep in itertools.count(0, 1):
 
         # "sampling from belief" here just means directly using state
-        action, info = planner(lambda: env.state)
+        action, planning_info = planner(lambda: env.state)
         assert isinstance(action, GridverseAction)
 
         reward, terminal = env.step(action)
 
-        print(f"{action} => {env.state.agent}")
+        logging.info("%s => %s", action, env.state.agent)
 
-        runtime_info.append(info)
-        rewards.append(reward)
+        runtime_info.append(
+            {
+                "timestep": timestep,
+                "reward": reward,
+                "terminal": terminal,
+                **planning_info,
+            }
+        )
 
-    return rewards, runtime_info
+        if terminal:
+            break
+
+    return runtime_info
 
 
-def pomdp_planning(env: InnerEnv, planner: Planner, belief: Belief):
+def run_pomdp_episode(env: InnerEnv, planner: Planner, belief: Belief):
     """Runs an episode in ``env`` using ``planner`` to pick actions and ``belief`` for state estimation"""
 
-    # to be generated and returned
-    rewards = []
+    # `runtime_info[t]` gives a dictionary of runtime info at timestep `t`
     runtime_info = []
-
-    terminal = False
-
     env.reset()
 
-    while not terminal:
+    logging.info("Starting episode in %s", env.state.agent)
+
+    for timestep in itertools.count(0, 1):
 
         action, planning_info = planner(belief.sample)
         assert isinstance(action, GridverseAction)
@@ -60,11 +67,18 @@ def pomdp_planning(env: InnerEnv, planner: Planner, belief: Belief):
         reward, terminal = env.step(action)
         obs = env.observation
 
-        print(f"{action} => {env.state.agent}")
+        logging.info("%s => %s", action, env.state.agent)
 
         belief_info = belief.update(action, obs)
 
-        runtime_info.append({"planning": planning_info, "belief": belief_info})
-        rewards.append(reward)
+        runtime_info.append(
+            {
+                "timestep": timestep,
+                "reward": reward,
+                "terminal": terminal,
+                "planning_info": planning_info,
+                "belief_info": belief_info,
+            }
+        )
 
-    return rewards, runtime_info
+    return runtime_info

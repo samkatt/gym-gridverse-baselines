@@ -19,6 +19,7 @@ def create_mcts(
     rollout_depth: int,
     max_tree_depth: int,
     discount_factor: float,
+    show_progress_bar: bool,
     **_,
 ) -> planning_types.Planner:
     """Creates a state-based (MDP) MCTS planner
@@ -26,6 +27,7 @@ def create_mcts(
     Uses ``env`` as simulator for its planning, the other input are parameters
     to MCTS.
 
+    :param show_progress_bar: if ``True``, will print progress bar
     :param _: for easy of forwarding dictionaries, this accepts and ignores any superfluous arguments
     """
 
@@ -40,7 +42,7 @@ def create_mcts(
         rollout_depth=rollout_depth,
         max_tree_depth=max_tree_depth,
         discount_factor=discount_factor,
-        progress_bar=True,
+        progress_bar=show_progress_bar,
     )
 
 
@@ -52,6 +54,7 @@ def create_pouct(
     rollout_depth: int,
     max_tree_depth: int,
     discount_factor: float,
+    show_progress_bar: bool,
     **_,
 ) -> planning_types.Planner:
     """Creates an observation/belief-based (POMDP) MCTS planner
@@ -59,6 +62,7 @@ def create_pouct(
     Uses ``env`` as simulator for its planning, the other input are parameters
     to the planner.
 
+    :param show_progress_bar: if ``True``, will print progress bar
     :param _: for easy of forwarding dictionaries, this accepts and ignores any superfluous arguments
     """
 
@@ -73,7 +77,7 @@ def create_pouct(
         rollout_depth=rollout_depth,
         max_tree_depth=max_tree_depth,
         discount_factor=discount_factor,
-        progress_bar=True,
+        progress_bar=show_progress_bar,
     )
 
 
