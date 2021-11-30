@@ -5,7 +5,7 @@ number of runs and a domain yaml file, then specifies the type of solution
 method, followed by solution method specific cofigurations. For example, to run
 state-based (mcts) online planning::
 
-    python plan.py 1 runtime_info.pkl yaml/gv_empty.8x8.yaml mcts yaml/online_mcts.yaml
+    python plan.py 1 yaml/gv_empty.8x8.yaml mcts yaml/online_mcts.yaml
 
 Note that most solution methods assume configurations are at some point passed
 through a yaml file. For convenience we allow *overwriting* values in these
@@ -13,15 +13,16 @@ config files by appending any call with overwriting values, for example::
 
     python plan.py 5 yaml/gv_crossing.5x5.yaml po-uct yaml/online_pouct.yaml num_sims=128
 
-Additionally (key-word) arguments are `-o/--out_file` and `-v/--verbose`.
+Additionally (key-word) arguments are `-o/--out_file <filename>` and
+`-v/--verbose` (flag).
 """
 
 import argparse
 import itertools
 import logging
 import pickle
-import pandas as pd
 
+import pandas as pd
 from gym_gridverse.envs.yaml.factory import factory_env_from_yaml
 from yaml.loader import SafeLoader
 
@@ -97,7 +98,8 @@ def main():
     if args.out_file:
         with open(args.out_file, "wb") as save_file:
             pickle.dump(
-                {"meta": conf, "data": pd.DataFrame(itertools.chain(*runtime_info))}, save_file
+                {"meta": conf, "data": pd.DataFrame(itertools.chain(*runtime_info))},
+                save_file,
             )
 
 

@@ -3,19 +3,16 @@
 Baseline algorithms applied to the [gym-gridverse
 domain(s)](https://github.com/abaisero/gym-gridverse).
 
-## To do
+## Installation and Usage
 
-- logistics
-  - manage configurations
-    - python 3.10
-    - `flake8`, `pylint`
-    - `isort`, `black`
-  - usage and project description
-  - fix `gym-gridverse` dependency
-- base lines
-  - online planning (belief or state-based)
-  - model free methods (value-based and policy gradient descent)
-- features
-  - result reporting
-  - configuration (file, program input, etc)
-  - logging
+Install the `requirements.txt` through `pip`:
+
+```sh
+python -m pip install -r requirements.txt
+```
+
+Once installed call the scripts in the root, specifically::
+
+    - `python plan.py -h`: run experiments with online planners
+    - `python render.py -h`: visualize policies
+    - `python plot_results.py -h`: visualize results

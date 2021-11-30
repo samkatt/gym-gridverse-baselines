@@ -9,8 +9,8 @@ followed by a list of file names. For example::
 
 import argparse
 from typing import Any, Dict
-import matplotlib.pyplot as plt
 
+import matplotlib.pyplot as plt
 import pandas as pd
 
 
